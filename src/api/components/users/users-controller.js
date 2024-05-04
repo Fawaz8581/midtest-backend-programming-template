@@ -2,7 +2,7 @@ const usersService = require('./users-service');
 const { errorResponder, errorTypes } = require('../../../core/errors');
 
 /**
- * Handle get list of users request
+ * Handle get list of users request with pagination
  * @param {object} request - Express request object
  * @param {object} response - Express response object
  * @param {object} next - Express route middlewares
@@ -10,12 +10,78 @@ const { errorResponder, errorTypes } = require('../../../core/errors');
  */
 async function getUsers(request, response, next) {
   try {
-    const users = await usersService.getUsers();
-    return response.status(200).json(users);
+    const pageNum = parseInt(request.query.page_number) || 1;
+    const pageSize = parseInt(request.query.page_size) || null;
+    const searchQuery = request.query.search;
+    const sorting = request.query.sort;
+
+    // Menggunakan fungsi getUsers yang telah diperbarui di users-service
+    const {
+      page_number,
+      page_size,
+      count,
+      total_pages,
+      has_previous_page,
+      has_next_page,
+      data,
+    } = await usersService.getUsers(pageNum, pageSize, searchQuery, sorting);
+
+    return response.status(200).json({
+      page_number,
+      page_size,
+      count,
+      total_pages,
+      has_previous_page,
+      has_next_page,
+      data,
+    });
   } catch (error) {
     return next(error);
   }
 }
+
+// Fungsi untuk mem-parsing parameter sort
+function parseSort(sortParam) {
+  if (!sortParam || typeof sortParam !== 'string') {
+    return null;
+  }
+
+  const parts = sortParam.split(':');
+  if (
+    parts.length !== 2 ||
+    !['name', 'email'].includes(parts[0]) ||
+    !['asc', 'desc'].includes(parts[1])
+  ) {
+    return null;
+  }
+
+  return { field: parts[0], order: parts[1] };
+}
+
+// Fungsi untuk mem-parsing parameter search
+function parseSearch(searchParam) {
+  if (!searchParam || typeof searchParam !== 'string') {
+    return null;
+  }
+
+  const parts = searchParam.split(':');
+  if (parts.length !== 2 || !['name', 'email'].includes(parts[0])) {
+    return null;
+  }
+
+  return { field: parts[0], key: parts[1] };
+}
+
+// Function lainnya tetap sama
+
+module.exports = {
+  getUsers,
+  getUser,
+  createUser,
+  updateUser,
+  deleteUser,
+  changePassword,
+};
 
 /**
  * Handle get user detail request
