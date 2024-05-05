@@ -1,3 +1,6 @@
+const { create } = require('lodash');
+const { transferId } = require('../../../models/transfers-schema');
+const { transfer } = require('../../../models');
 const { User } = require('../../../models');
 
 /**
@@ -9,12 +12,29 @@ async function getUsers() {
 }
 
 /**
+ * get a list of transfer
+ * @returns {Promise}
+ */
+async function getTransfer() {
+  return transfer.find({});
+}
+
+/**
  * Get user detail
  * @param {string} id - User ID
  * @returns {Promise}
  */
 async function getUser(id) {
   return User.findById(id);
+}
+
+/**
+ * Get user detail
+ * @param {string} id - User ID
+ * @returns {Promise}
+ */
+async function getTransfer1(id) {
+  return transfer.findById(id);
 }
 
 /**
@@ -29,6 +49,22 @@ async function createUser(name, email, password) {
     name,
     email,
     password,
+  });
+}
+
+async function createTransfer(
+  transferId,
+  fromUserId,
+  toUserId,
+  amount,
+  timestamp
+) {
+  return transfer.create({
+    transferId,
+    fromUserId,
+    toUserId,
+    amount,
+    timestamp,
   });
 }
 
@@ -54,12 +90,39 @@ async function updateUser(id, name, email) {
 }
 
 /**
+ * Update existing transfer
+ * @param {string} id - User ID
+ * @param {string} amount - amount
+ * @returns {Promise}
+ */
+async function updateTransfer(id, amount) {
+  return transfer.updateOne(
+    {
+      _id: id,
+    },
+    {
+      $set: {
+        amount,
+      },
+    }
+  );
+}
+/**
  * Delete a user
  * @param {string} id - User ID
  * @returns {Promise}
  */
 async function deleteUser(id) {
   return User.deleteOne({ _id: id });
+}
+
+/**
+ * Delete a transfer
+ * @param {string} id - User ID
+ * @returns {Promise}
+ */
+async function deleteTransfer(id) {
+  return transfer.deleteOne({ _id: id });
 }
 
 /**
@@ -82,6 +145,11 @@ async function changePassword(id, password) {
 }
 
 module.exports = {
+  deleteTransfer,
+  getTransfer1,
+  updateTransfer,
+  getTransfer,
+  createTransfer,
   getUsers,
   getUser,
   createUser,

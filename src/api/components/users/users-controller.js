@@ -254,8 +254,105 @@ async function changePassword(request, response, next) {
     return next(error);
   }
 }
+/**
+ * Handle update transfer request
+ * @param {object} request - Express request object
+ * @param {object} response - Express response object
+ * @param {object} next - Express route middlewares
+ * @returns {object} Response object or pass an error to the next route
+ */
+async function updateTransfer(request, response, next) {
+  try {
+    const id = request.params.id;
+    const amount = request.body.amount;
+
+    const success = await usersService.updateTransfer(id, amount);
+    if (!success) {
+      throw errorResponder(
+        errorTypes.UNPROCESSABLE_ENTITY,
+        'Failed to update transfer'
+      );
+    }
+
+    return response.status(200).json({ id });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+/**
+ 
+Handle get list of users request
+@param {object} request - Express request object
+@param {object} response - Express response object
+@param {object} next - Express route middlewares
+@returns {object} Response object or pass an error to the next route
+*/
+async function getTransfer(request, response, next) {
+  try {
+    const transfer = await usersService.getTransfers();
+    return response.status(200).json(transfer);
+  } catch (error) {
+    return next(error);
+  }
+}
+
+/**
+ * Handle delete user request
+ * @param {object} request - Express request object
+ * @param {object} response - Express response object
+ * @param {object} next - Express route middlewares
+ * @returns {object} Response object or pass an error to the next route
+ */
+async function deleteTransfer(request, response, next) {
+  try {
+    const id = request.params.id;
+
+    const success = await usersService.deleteTransfer(id);
+    if (!success) {
+      throw errorResponder(
+        errorTypes.UNPROCESSABLE_ENTITY,
+        'Failed to delete user'
+      );
+    }
+
+    return response.status(200).json({ id });
+  } catch (error) {
+    return next(error);
+  }
+}
+/**
+Handle create user request
+@param {object} request - Express request object
+@param {object} response - Express response object
+@param {object} next - Express route middlewares
+@returns {object} Response object or pass an error to the next route
+*/
+async function createTransfer(request, response, next) {
+  try {
+    const toUserId = request.body.toUserId;
+    const amount = request.body.amount;
+    const id = request.params.id;
+
+    const success = await usersService.createTransfer(id, toUserId, amount);
+    if (!success) {
+      throw errorResponder(
+        errorTypes.UNPROCESSABLE_ENTITY,
+        'Failed to create transfer'
+      );
+    }
+
+    return response.status(200).json({ id, toUserId, amount });
+  } catch (error) {
+    return next(error);
+  }
+}
 
 module.exports = {
+  deleteTransfer,
+  updateTransfer,
+  getTransfer,
+  createTransfer,
   getUsers,
   getUser,
   createUser,
